@@ -8,6 +8,11 @@
 		<div id="header">
 			<h1>Siemano</h1>
 		</div>
+			{% if username != "" %}
+			<p id="login"> Hello, {{username}} </p>
+			{% else %}
+			<p id="login"> You are not logged in </p>
+			{% endif %}
 		<form id="bform">
 			<button formaction="/login" id="but"> Login </button>
 			<button formaction="/register" id="but"> Register </button>

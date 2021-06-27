@@ -1,5 +1,5 @@
 from flask import Flask, redirect, render_template, request, escape, session, url_for
-import json, sqlite3
+import json, sqlite3, jinja2
 
 app = Flask(__name__, template_folder="templates", static_url_path="")
 app.secret_key = b'ESJC7H9^YeNGz&Xak&#7R_K&FDQceA@Z-swKUr3RVW$xSR+$Q4F9&Sen5kveP*k-'
@@ -17,8 +17,11 @@ con.close()
 print(users)
 
 @app.route('/')
-def main_page():
-    return render_template('index.html')
+def index():
+	if 'username' in session:
+		return render_template('index.html', username=session['username'])
+	else:
+		return render_template('index.html', username="")
 
 @app.route('/login')
 def login():
@@ -33,7 +36,7 @@ def login_post():
       if x['username'] == usrnme:
         if x['password'] == psswd:
         	session['username']=usrnme
-        	return redirect(url_for("show_user_profile", username=session['username']))
+        	return redirect(url_for("index"))
         else:
         	return "wrong password"
     return 'No such user'

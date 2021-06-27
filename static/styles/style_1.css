@@ -19,3 +19,6 @@ button {
 	justify-content: center;
 	display: flex;
 }
+#login {
+	text-align: right;
+}
