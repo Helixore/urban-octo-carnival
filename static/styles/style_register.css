@@ -1,0 +1,19 @@
+.login_div {
+	background-color: #2c60db;
+	border-radius: 5px;
+	width: 20%;
+	height: 20%;
+	margin: auto;
+}
+h3 {
+	padding: 10px;
+	text-align: center;
+	font: 18px Arial, sans-serif;
+}
+.input {
+	text-align: center;
+}
+.input_button {
+	padding: 10px;
+	text-align: center;
+}
