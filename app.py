@@ -1,20 +1,21 @@
-from flask import Flask, redirect, render_template, request, escape, session, url_for
-import json, sqlite3, jinja2
+from flask import Flask, redirect, render_template, request, session, url_for
+from markupsafe import escape
+import json, sqlite3 as sql, jinja2
+import secrets, string
 
 app = Flask(__name__, template_folder="templates", static_url_path="")
-app.secret_key = b'ESJC7H9^YeNGz&Xak&#7R_K&FDQceA@Z-swKUr3RVW$xSR+$Q4F9&Sen5kveP*k-'
+app.secret_key = ''.join(secrets.choice(string.ascii_letters + string.digits) for i in range(64))
 
 users = []
-con = sqlite3.connect('users.db')
-cur = con.cursor()
-cur.execute(("SELECT * FROM users;"))
-for x, y in cur.fetchall():
-	users.append({
-		"username": x,
-		"password": y
-		})
-con.close()
-print(users)
+def depr():
+    con = sql.connect('users.db')
+    cur = con.cursor()
+    cur.execute(("SELECT * FROM users;"))
+    data = cur.fetchall()
+    con.close()
+    print(data)
+
+
 
 @app.route('/')
 def index():
@@ -29,17 +30,23 @@ def login():
 
 @app.route('/login', methods=['POST'])
 def login_post():
+    data = []
     usrnme = request.form['username']
     psswd = request.form['password']
-    print(usrnme, psswd)
-    for x in users:
-      if x['username'] == usrnme:
-        if x['password'] == psswd:
-        	session['username']=usrnme
-        	return redirect(url_for("index"))
+    with sql.connect("users.db") as conn:
+        data = conn.execute("SELECT * FROM users;")
+        data = data.fetchall()
+    for x, y in data:
+        print("Form username: "+usrnme, psswd)
+        if x == usrnme:
+            if y == psswd:
+                session['username']=usrnme
+                return redirect(url_for("index"))
+            else:
+                return "wrong password"
         else:
-        	return "wrong password"
-    return 'No such user'
+            return 'No such user'
+    return "", 500
 
 @app.route('/register')
 def register():
@@ -47,18 +54,14 @@ def register():
 
 @app.route('/register', methods=['POST'])
 def register_post():
-   con = sqlite3.connect('users.db')
-   cur = con.cursor()
-   cur.execute(("INSERT INTO users VALUES (?, ?)"), (request.form["username"], request.form["password"]))
-   con.commit()
-   con.close()
-   users.append({
-        "username": request.form['username'],
-       	"password": request.form['password']
-   })
+   with sql.connect('users.db') as conn:
+        conn.cursor().execute(("INSERT INTO users VALUES (?, ?)"), (request.form["username"], request.form["password"]))
+        conn.commit()
    print(users)
    return "<h1 style='text-align: center;'>Registered!</h1>"
 
 @app.route('/user/<username>')
 def show_user_profile(username):
     return 'User '+escape(username)
+
+app.run('0.0.0.0', debug=True)
